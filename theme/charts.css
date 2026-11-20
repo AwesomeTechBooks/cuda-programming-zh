@@ -1,0 +1,897 @@
+/* 全书统计图：颜色、排版和交互反馈。图形本身由 charts.js 生成。 */
+
+.cu-chart {
+  --cu-s1: #2a78d6;
+  --cu-s2: #eb6834;
+  --cu-s3: #1baf7a;
+  --cu-s4: #eda100;
+  --cu-ink: var(--fg);
+  --cu-ink2: color-mix(in srgb, var(--fg) 70%, var(--bg));
+  --cu-grid: color-mix(in srgb, var(--fg) 10%, var(--bg));
+  --cu-axis: color-mix(in srgb, var(--fg) 30%, var(--bg));
+
+  position: relative;
+  margin: 1.5em 0;
+  text-align: left;
+  font: inherit;
+}
+
+html.rust .cu-chart {
+  --cu-s2: #c94f1f;
+  --cu-s3: #14875e;
+  --cu-s4: #9c6a00;
+}
+html.coal .cu-chart,
+html.navy .cu-chart,
+html.ayu .cu-chart {
+  --cu-s1: #3987e5;
+  --cu-s2: #d95926;
+  --cu-s3: #199e70;
+  --cu-s4: #c98500;
+}
+
+.cu-chart > figcaption {
+  margin-top: 0.6em;
+  text-align: center;
+}
+
+/* 每张图上方的一行 HTML：图例或纵轴名在左，提示和切换按钮在右。 */
+.cu-chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 14px;
+  margin: 0 0 0.45em;
+  color: var(--cu-ink2);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cu-chart-head-left,
+.cu-chart-head-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-width: 0;
+}
+
+.cu-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+}
+
+.cu-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cu-ink);
+  font-size: 12px;
+}
+
+.cu-chart-legend-swatch {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+/* 可点击的图例项：隐藏的组用空心色块和淡一点的字，仍保持可读。 */
+.cu-chart-legend-button {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cu-ink);
+  font: inherit;
+  font-size: 12px;
+  line-height: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cu-chart-legend-button[aria-pressed="false"] {
+  color: var(--cu-ink2);
+}
+
+.cu-chart .cu-chart-legend-button[aria-pressed="false"] .cu-chart-legend-swatch {
+  box-sizing: border-box;
+  border: 1px solid currentColor;
+  background: transparent;
+}
+
+.cu-chart-legend-button[aria-disabled="true"] {
+  cursor: default;
+}
+
+.cu-chart-legend-button:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--cu-s1);
+  outline-offset: 2px;
+}
+
+.cu-chart-ylabel,
+.cu-chart-hint {
+  color: var(--cu-ink2);
+  font-size: 12px;
+}
+
+.cu-chart-plot {
+  position: relative;
+  width: 100%;
+}
+
+.cu-chart-plot svg {
+  display: block;
+  overflow: visible;
+  font: inherit;
+}
+
+/* 横轴名放在 SVG 下方，窄屏可以折行，不会被裁掉。 */
+.cu-chart-xlabel {
+  margin: 4px auto 0;
+  max-width: 100%;
+  color: var(--cu-ink2);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* 数据或配置有错时，在绘图区里留一行给作者看。 */
+.cu-chart-error {
+  padding: 8px 0;
+  color: var(--cu-ink2);
+  font-size: 12px;
+}
+
+.cu-chart-head-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-width: 0;
+}
+
+/* 只有命中区接收指针事件，线和点不会挡住交互。 */
+.cu-chart-plot svg :not(.cu-hit) {
+  pointer-events: none;
+}
+
+.cu-chart .cu-s1 { color: var(--cu-s1); }
+.cu-chart .cu-s2 { color: var(--cu-s2); }
+.cu-chart .cu-s3 { color: var(--cu-s3); }
+.cu-chart .cu-s4 { color: var(--cu-s4); }
+
+.cu-chart .cu-legend-swatch.cu-s1 { background: var(--cu-s1); }
+.cu-chart .cu-legend-swatch.cu-s2 { background: var(--cu-s2); }
+.cu-chart .cu-legend-swatch.cu-s3 { background: var(--cu-s3); }
+.cu-chart .cu-legend-swatch.cu-s4 { background: var(--cu-s4); }
+
+.cu-chart .cu-bar.cu-s1 { fill: var(--cu-s1); }
+.cu-chart .cu-bar.cu-s2 { fill: var(--cu-s2); }
+.cu-chart .cu-bar.cu-s3 { fill: var(--cu-s3); }
+.cu-chart .cu-bar.cu-s4 { fill: var(--cu-s4); }
+.cu-chart .cu-dot.cu-s1 { fill: var(--cu-s1); }
+.cu-chart .cu-dot.cu-s2 { fill: var(--cu-s2); }
+.cu-chart .cu-dot.cu-s3 { fill: var(--cu-s3); }
+.cu-chart .cu-dot.cu-s4 { fill: var(--cu-s4); }
+
+.cu-chart .cu-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cu-chart .cu-line.cu-s1 { stroke: var(--cu-s1); }
+.cu-chart .cu-line.cu-s2 { stroke: var(--cu-s2); }
+.cu-chart .cu-line.cu-s3 { stroke: var(--cu-s3); }
+.cu-chart .cu-line.cu-s4 { stroke: var(--cu-s4); }
+
+/* extraSeries 是配置里的推导值，用虚线区分程序输出。 */
+.cu-chart .cu-line.cu-dashed {
+  stroke-dasharray: 6 4;
+}
+
+.cu-chart .cu-chart-legend-swatch.cu-legend-dashed {
+  background: repeating-linear-gradient(
+    to bottom,
+    currentColor 0 2px,
+    transparent 2px 4px
+  );
+}
+
+.cu-chart .cu-roofline-upper {
+  stroke: var(--cu-ink2);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+  fill: none;
+}
+
+.cu-chart .cu-roofline-point {
+  fill: var(--cu-s1);
+  stroke: var(--bg);
+  stroke-width: 2;
+  transition: filter 120ms ease;
+}
+
+.cu-chart .cu-roofline-point.cu-hot {
+  filter: brightness(1.15) saturate(1.08);
+}
+
+.cu-chart .cu-roofline-label,
+.cu-chart .cu-roofline-balance {
+  fill: var(--cu-ink);
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.cu-chart .cu-roofline-balance {
+  fill: var(--cu-ink2);
+  font-weight: 400;
+}
+
+.cu-chart .cu-dot {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.cu-chart .cu-crosshair {
+  stroke: var(--cu-axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.cu-chart .cu-grid {
+  stroke: var(--cu-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.cu-chart .cu-axis {
+  stroke: var(--cu-axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.cu-chart .cu-ref {
+  stroke: var(--cu-ink2);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+  opacity: 0.7;
+}
+
+.cu-chart .cu-spread {
+  stroke: var(--cu-ink);
+  stroke-width: 1.5;
+  stroke-opacity: 0.45;
+  stroke-linecap: butt;
+}
+
+.cu-chart .cu-bar {
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+.cu-chart .cu-bars-enter .cu-bar {
+  animation: cu-bar-fade-in 150ms ease;
+}
+
+@keyframes cu-bar-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cu-chart .cu-bar.cu-hot {
+  filter: brightness(1.15) saturate(1.08);
+}
+
+/* 天平图的轨道：左右两段中间留 2px 缝，外端圆角、缝两侧直角。 */
+.cu-chart .cu-balance-seg {
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+.cu-chart .cu-balance-seg.cu-s1 { fill: var(--cu-s1); }
+.cu-chart .cu-balance-seg.cu-s2 { fill: var(--cu-s2); }
+
+.cu-chart .cu-balance-seg.cu-hot {
+  filter: brightness(1.15) saturate(1.08);
+}
+
+.cu-chart .cu-task-line {
+  stroke: var(--cu-ink);
+  stroke-width: 1.5;
+  stroke-linecap: butt;
+}
+
+.cu-chart .cu-task-dot {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.cu-chart .cu-task-dot.cu-s1 { fill: var(--cu-s1); }
+.cu-chart .cu-task-dot.cu-s2 { fill: var(--cu-s2); }
+.cu-chart .cu-task-dot.cu-s3 { fill: var(--cu-s3); }
+.cu-chart .cu-task-dot.cu-s4 { fill: var(--cu-s4); }
+
+.cu-chart .cu-balance-label {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cu-chart .cu-task-label {
+  fill: var(--cu-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 轨道上方和竖线顶端的文字都压着线，用页面背景色描边隔开。 */
+.cu-chart .cu-balance-label,
+.cu-chart .cu-task-label {
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.cu-chart .cu-note {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+}
+
+/* SVG 文字：数字用等宽数字，字号和页面正文区分开。 */
+.cu-chart .cu-tick {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cu-chart .cu-label {
+  fill: var(--cu-ink);
+  font-size: 13px;
+}
+
+.cu-chart .cu-value {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cu-chart .cu-panel-name {
+  fill: var(--cu-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cu-chart .cu-panel-sub {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+}
+
+.cu-chart .cu-axis-name {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+}
+
+.cu-chart .cu-series-label {
+  fill: var(--cu-ink);
+  font-size: 12px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.cu-chart .cu-point-label {
+  fill: var(--cu-ink);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cu-chart .cu-ref-label {
+  fill: var(--cu-ink2);
+  font-size: 12px;
+}
+
+/* 文字压在折线或网格上时，用一圈页面背景色描边隔开。 */
+.cu-chart .cu-point-label,
+.cu-chart .cu-ref-label {
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+/* 透明命中区：整行/整个绘图区都能触发 tooltip，也都能用键盘聚焦。 */
+.cu-chart .cu-hit {
+  fill: transparent;
+  stroke: transparent;
+  pointer-events: all;
+  cursor: crosshair;
+}
+
+.cu-chart .cu-hit:focus {
+  outline: none;
+}
+
+.cu-chart .cu-hit:focus-visible {
+  stroke: var(--cu-s1);
+  stroke-width: 2;
+  stroke-opacity: 0.75;
+}
+
+/* Tooltip 由 JS 填充内容，颜色和字体全部在这里。 */
+.cu-chart-tip {
+  position: absolute;
+  z-index: 20;
+  display: none;
+  box-sizing: border-box;
+  max-width: 260px;
+  padding: 8px 10px;
+  border: 1px solid var(--theme-popup-border);
+  border-radius: 6px;
+  background: var(--theme-popup-bg);
+  color: var(--cu-ink2);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+  pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+}
+
+.cu-chart-tip.cu-show {
+  display: block;
+}
+
+.cu-tip-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cu-tip-line + .cu-tip-line {
+  margin-top: 2px;
+}
+
+.cu-tip-text {
+  min-width: 0;
+}
+
+.cu-tip-name {
+  min-width: 0;
+}
+
+.cu-tip-key {
+  flex: none;
+  width: 12px;
+  height: 3px;
+  border-radius: 1.5px;
+  background: currentColor;
+}
+
+.cu-tip-key.cu-s1 { background: var(--cu-s1); }
+.cu-tip-key.cu-s2 { background: var(--cu-s2); }
+.cu-tip-key.cu-s3 { background: var(--cu-s3); }
+.cu-tip-key.cu-s4 { background: var(--cu-s4); }
+.cu-tip-key.cu-axis { background: var(--cu-axis); }
+
+.cu-tip-key.cu-tip-square {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+}
+
+.cu-tip-value {
+  color: var(--cu-ink);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.cu-tip-meta,
+.cu-tip-note {
+  color: var(--cu-ink2);
+}
+
+/* 折线图的“线性 / 对数”两段控件。 */
+.cu-chart-toggle {
+  display: inline-flex;
+  align-items: stretch;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+.cu-chart-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px 1px 0;
+  color: var(--cu-ink2);
+  font-size: 12px;
+}
+
+.cu-chart-toggle-button {
+  appearance: none;
+  margin: 0;
+  padding: 1px 9px;
+  border: 1px solid var(--cu-axis);
+  background: transparent;
+  color: var(--cu-ink2);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.cu-chart-toggle-button:first-of-type {
+  border-radius: 5px 0 0 5px;
+}
+
+.cu-chart-toggle-button + .cu-chart-toggle-button {
+  border-left: 0;
+  border-radius: 0 5px 5px 0;
+}
+
+.cu-chart-toggle-button[aria-pressed="true"] {
+  background: var(--cu-grid);
+  color: var(--cu-ink);
+}
+
+.cu-chart-toggle-button:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--cu-s1);
+  outline-offset: -2px;
+}
+
+.cu-chart-data > summary {
+  color: var(--cu-ink2);
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.cu-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cu-chart *,
+  .cu-chart-tip,
+  .cu-chart-tip * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media print {
+  .cu-chart-tip,
+  .cu-chart-hint,
+  .cu-chart-toggle {
+    display: none !important;
+  }
+}
+
+/* ------------------------------ 堆叠图 ------------------------------ */
+
+.cu-chart-stack .cu-chart-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 4px;
+  margin: 0 0 8px;
+  border-bottom: 1px solid var(--cu-axis);
+}
+
+.cu-chart-stack .cu-chart-tab {
+  appearance: none;
+  margin: 0 0 -1px;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  background: transparent;
+  color: var(--cu-ink2);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease,
+    border-color 120ms ease;
+}
+
+.cu-chart-stack .cu-chart-tab:hover {
+  color: var(--cu-ink);
+}
+
+.cu-chart-stack .cu-chart-tab[aria-selected="true"] {
+  border-color: var(--cu-axis);
+  background: var(--cu-grid);
+  color: var(--cu-ink);
+}
+
+.cu-chart-stack .cu-chart-tab:focus-visible {
+  outline: 2px solid var(--cu-s1);
+  outline-offset: -2px;
+}
+
+.cu-chart-stack .cu-chart-stage-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.cu-chart-stack .cu-chart-stage {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 2px 8px;
+  border: 1px solid var(--cu-axis);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--cu-ink2);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.cu-chart-stack .cu-chart-stage:hover {
+  color: var(--cu-ink);
+}
+
+.cu-chart-stack .cu-chart-stage[aria-pressed="true"] {
+  border-color: var(--cu-ink2);
+  background: color-mix(in srgb, var(--fg) 14%, var(--bg));
+  color: var(--cu-ink);
+  font-weight: 600;
+}
+
+.cu-chart-stack .cu-chart-stage:focus-visible {
+  outline: 2px solid var(--cu-s1);
+  outline-offset: 2px;
+}
+
+.cu-chart-stack .cu-stack-row {
+  transition: opacity 120ms ease;
+}
+
+.cu-chart-stack .cu-stack-row.cu-dim {
+  opacity: 0.35;
+}
+
+.cu-chart-stack .cu-stack-row.cu-selected .cu-bar {
+  filter: brightness(1.08) saturate(1.05);
+}
+
+.cu-chart-stack .cu-stack-seg {
+  transition: filter 120ms ease, opacity 120ms ease;
+}
+
+.cu-chart-stack .cu-stack-seg.cu-hot {
+  filter: brightness(1.15) saturate(1.08);
+}
+
+.cu-chart-stack .cu-stack-detail {
+  margin: 12px 0 0;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--cu-axis);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--fg) 3%, var(--bg));
+  color: var(--cu-ink);
+  font-size: inherit;
+  text-align: left;
+}
+
+.cu-chart-stack .cu-stack-detail-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.cu-chart-stack .cu-stack-detail-title {
+  overflow-wrap: anywhere;
+}
+
+.cu-chart-stack .cu-stack-detail-total {
+  color: var(--cu-ink2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cu-chart-stack .cu-stack-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cu-chart-stack .cu-stack-detail-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cu-chart-stack .cu-stack-detail-row.cu-stack-row-max {
+  font-weight: 700;
+}
+
+.cu-chart-stack .cu-stack-detail-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cu-chart-stack .cu-stack-detail-value {
+  color: var(--cu-ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cu-chart-stack .cu-stack-share {
+  min-width: 52px;
+  color: var(--cu-ink2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cu-chart-stack .cu-stack-row-max .cu-stack-share {
+  color: var(--cu-ink);
+}
+
+.cu-chart-stack .cu-stack-back {
+  appearance: none;
+  margin: 10px 0 0;
+  padding: 3px 10px;
+  border: 1px solid var(--cu-axis);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--cu-ink2);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.cu-chart-stack .cu-stack-back:hover {
+  background: var(--cu-grid);
+  color: var(--cu-ink);
+}
+
+.cu-chart-stack .cu-stack-back:focus-visible {
+  outline: 2px solid var(--cu-s1);
+  outline-offset: 2px;
+}
+
+.cu-chart-stack .cu-chart-plot.cu-view-enter {
+  animation: cu-stack-view-in 180ms ease;
+}
+
+.cu-chart-stack .cu-stack-detail.cu-stack-detail-enter {
+  animation: cu-stack-detail-in 150ms ease;
+}
+
+@keyframes cu-stack-view-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cu-stack-detail-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 说明区：字号跟随正文，不缩小。没有 JS 时全部显示并带所属行/阶段前缀。 */
+.cu-chart .cu-chart-notes {
+  margin: 10px 0 0;
+  color: var(--cu-ink);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.cu-chart .cu-chart-note {
+  font-size: inherit;
+}
+
+.cu-chart .cu-chart-note p {
+  margin: 0.35em 0;
+}
+
+.cu-chart .cu-chart-note:first-child p:first-child {
+  margin-top: 0;
+}
+
+.cu-chart .cu-chart-note:last-child p:last-child {
+  margin-bottom: 0;
+}
+
+.cu-chart .cu-chart-note[data-row]::before {
+  content: attr(data-row) "：";
+  font-weight: 700;
+}
+
+.cu-chart .cu-chart-note[data-column]::before {
+  content: attr(data-column) "：";
+  font-weight: 700;
+}
+
+.cu-chart .cu-chart-note.cu-note-enter {
+  animation: cu-stack-note-in 150ms ease;
+}
+
+@keyframes cu-stack-note-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.cu-chart.cu-chart-ready .cu-chart-note {
+  display: none;
+}
+
+.cu-chart.cu-chart-ready .cu-chart-note.cu-note-current {
+  display: block;
+}
+
+.cu-chart.cu-chart-ready .cu-chart-note[data-row]::before,
+.cu-chart.cu-chart-ready .cu-chart-note[data-column]::before {
+  content: none;
+}
+
+/* 打印时回到无 JS 的样子：所有说明都印出来，带上所属行/阶段。 */
+@media print {
+  .cu-chart.cu-chart-ready .cu-chart-note {
+    display: block !important;
+  }
+
+  .cu-chart.cu-chart-ready .cu-chart-note[data-row]::before {
+    content: attr(data-row) "：" !important;
+  }
+
+  .cu-chart.cu-chart-ready .cu-chart-note[data-column]::before {
+    content: attr(data-column) "：" !important;
+  }
+}
