@@ -4,7 +4,7 @@
 
 书中涉及的 API 行为、硬件参数和平台限制，以 NVIDIA 的官方文档为准。本书的讲解、组织方式和示例都是重新编写的，下面这些文档适合在读完相应章节以后查阅细节：
 
-- [CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)：编程模型、语言扩展、内存模型和各项功能的权威说明。
+- [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)：编程模型、语言扩展、内存模型和各项功能的权威说明。
 - [CUDA C++ Best Practices Guide](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/)：性能优化的方法和检查清单。
 - [CUDA Runtime API](https://docs.nvidia.com/cuda/cuda-runtime-api/) 与 [CUDA Driver API](https://docs.nvidia.com/cuda/cuda-driver-api/)：所有 Runtime 和 Driver 函数的参考手册。
 - [NVCC 文档](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/)：编译选项、`-arch` 与 `-gencode`、分离编译（第 4 章）。
