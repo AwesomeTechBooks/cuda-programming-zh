@@ -46,4 +46,4 @@
 
 本书不是 NVIDIA 的官方文档，没有经过 NVIDIA 审阅或认可。涉及具体 API 的签名、硬件支持和平台限制时，请以你所用版本的官方文档为准。本书在 AI 辅助下编写，欢迎指出错误。文字和代码的许可见[版权与许可](license.md)，参考的资料见[参考资料与致谢](references.md)。
 
-本书的旧版（14 部分 87 章，按主题逐项讲解，每章附 API 速查）已不再更新，保留在[这里](https://winteryangwt.github.io/Awesome-Tech-Books/cuda-programming-zh-legacy/)供查阅。
+本书的旧版（14 部分 87 章，按主题逐项讲解，每章附 API 速查）已不再更新，也不再有网页版。Markdown 源稿保留在已归档的旧仓库里，可以在 GitHub 上[从目录开始读](https://github.com/winterYANGWT/Awesome-Tech-Books/blob/main/books/cuda-programming-zh-legacy/src/SUMMARY.md)。

@@ -10,7 +10,7 @@
   每个程序开头写有编译命令。`book.toml`、`theme/` 是 mdBook 配置。
 - `runs/chNN/`：示例程序的完整输出存档，正文引用的输出都出自这里。
 - 网页由 GitHub Actions 调用 [platform](https://github.com/AwesomeTechBooks/platform) 的流水线用 mdBook 构建，仓库里不含生成的 HTML。
-- 旧版（14 部分 87 章）不再更新，留在已归档的旧仓库里：[在线阅读](https://winteryangwt.github.io/Awesome-Tech-Books/cuda-programming-zh-legacy/)，[源码](https://github.com/winterYANGWT/Awesome-Tech-Books/tree/main/books/cuda-programming-zh-legacy)。
+- 旧版（14 部分 87 章）不再更新，也不再有网页版。Markdown 源稿留在已归档的旧仓库里，可以在 GitHub 上[从目录开始读](https://github.com/winterYANGWT/Awesome-Tech-Books/blob/main/books/cuda-programming-zh-legacy/src/SUMMARY.md)。
 - 许可证：文字和插图 CC BY 4.0（见 `LICENSE`），示例代码 MIT（见 `LICENSE-CODE`）。
 - 本书不是 NVIDIA 官方文档，未经 NVIDIA 审阅或认可。NVIDIA、CUDA 是 NVIDIA Corporation 的商标。
 - 本书在 AI 辅助下编写和整理，欢迎通过 issue 指正错误。
